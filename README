@@ -1,0 +1,47 @@
+# Image Retrieval with SimCLR and Supervised Contrastive Learning
+
+## Project Overview
+This project implements an image retrieval system that combines SimCLR pre-trained weights with Supervised Contrastive Learning (SupCon). The system finds visually and semantically similar images to a given query image by leveraging powerful representations that group similar images together in the embedding space.
+
+## Features
+- Uses a ResNet50 backbone with pre-trained SimCLR weights (converted from TensorFlow)
+- Fine-tunes the model with Supervised Contrastive Loss for better feature learning
+- Provides tools for computing similarity between images
+- Includes visualization of similar images
+- Evaluates performance using top-k retrieval accuracy
+- Creates submission files in the required JSON format for API integration
+
+## How it Works
+1. **Feature Learning Pipeline**:
+   - Start with ResNet50 pre-trained on SimCLR (self-supervised learning)
+   - Fine-tune with Supervised Contrastive Loss using labeled data
+   - Use the learned embeddings for image retrieval tasks
+
+2. **Image Retrieval Process**:
+   - Extract feature embeddings using the fine-tuned model
+   - Compute cosine similarity with all images in the dataset
+   - Return the most similar images based on similarity scores
+
+3. **Evaluation**: The system evaluates retrieval performance using top-k accuracy, measuring how often the retrieved images belong to the same class as the query image.
+
+## Requirements
+- Python 3.7+
+- PyTorch 1.7+
+- torchvision
+- Pillow
+- numpy
+- matplotlib
+- tqdm
+- wandb (for experiment tracking)
+
+## Model Architecture
+- **Backbone**: ResNet50 pre-trained with SimCLR (self-supervised learning)
+- **Projection Head**: MLP with structure [2048 → 512 → 128]
+- **Training**: Supervised Contrastive Loss with temperature parameter
+
+## References
+1. [Supervised Contrastive Learning](https://arxiv.org/abs/2004.11362)
+2. [A Simple Framework for Contrastive Learning of Visual Representations (SimCLR)](https://arxiv.org/abs/2002.05709)
+
+## License
+[MIT License](LICENSE)
