@@ -1,0 +1,11 @@
+# add python, pythorch and ipynob file common gitignore files
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+.vscode/
+.venv/
+checkpoints/
+wandb/
+test/
+train/
+resnet50-1x.pth
