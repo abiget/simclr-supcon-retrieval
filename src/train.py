@@ -1,4 +1,5 @@
-import torch
+import os
+import requests
 import torch
 import torch.nn as nn
 import argparse
@@ -96,6 +97,19 @@ def init_wandb(project="SupCon-Competition", run_name="supcon_experiment", confi
         config=config
     )
 
+def download_simclr_checkpoint(checkpoint_path="resnet50-1x.pth"):
+
+    if not os.path.exists(checkpoint_path):
+        url = "https://huggingface.co/lightly-ai/simclrv1-imagenet1k-resnet50-1x/resolve/main/resnet50-1x.pth"
+        print(f"Downloading SimCLR checkpoint from {url}...")
+        response = requests.get(url)
+        if response.status_code == 200:
+            with open(checkpoint_path, 'wb') as f:
+                f.write(response.content)
+            print(f"Checkpoint downloaded and saved to {checkpoint_path}")
+        else:
+            raise Exception(f"Failed to download checkpoint. Status code: {response.status_code}")
+
 if __name__ == '__main__':
     parse = argparse.ArgumentParser(description="Train a SupCon model.")
     parse.add_argument("--device", type=str, default="cuda:0" if torch.cuda.is_available() else "cpu", help="Device to use for training")
@@ -127,6 +141,9 @@ if __name__ == '__main__':
     temperature = args.temperature
     optimizer = args.optimizer
     # ------------------------------------------------
+
+    # down load the resnet50 checkpoint if not already present
+    download_simclr_checkpoint(checkpoint_path="resnet50-1x.pth")
 
     # compute dataset statistics
     mean, std = compute_dataset_statistics(data_dir, image_size=args.image_size)
