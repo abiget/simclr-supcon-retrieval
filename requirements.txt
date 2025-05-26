@@ -1,6 +1,5 @@
 ipykernel==6.29.5
 matplotlib==3.10.3
-pip==24.0
 torchaudio==2.7.0+cu128
 torchvision==0.22.0+cu128
 tqdm==4.67.1
