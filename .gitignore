@@ -8,3 +8,4 @@ checkpoints/
 wandb/
 test/
 train/
+resnet50-1x.pth
