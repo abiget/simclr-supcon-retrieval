@@ -26,13 +26,12 @@ This project implements an image retrieval system that combines SimCLR pre-train
 
 ## Requirements
 - Python 3.7+
-- PyTorch 1.7+
-- torchvision
-- Pillow
-- numpy
-- matplotlib
-- tqdm
-- wandb (for experiment tracking)
+- ipykernel==6.29.5
+- matplotlib==3.10.3
+- torchvision==0.22.0+cu128
+- tqdm==4.67.1
+- wandb==0.19.11
+
 
 ## Model Architecture
 - **Backbone**: ResNet50 pre-trained with SimCLR (self-supervised learning)
