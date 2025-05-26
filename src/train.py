@@ -11,6 +11,7 @@ from models.projection import ProjectionHead
 from models.full_model import SupConModel
 from utils.data_utils import get_data_loader
 from utils.supconloss import SupConLoss
+from utils.data_utils import compute_dataset_statistics
 
 # Dummy dataset for testing purposes-----------------------------------
 class DummySupConDataset(Dataset):
@@ -101,13 +102,14 @@ if __name__ == '__main__':
     parse.add_argument("--run_name", type=str, default="supcon_experiment", help="Name of the run for WandB")
     parse.add_argument("--checkpoint_path", type=str, default="checkpoints", help="Path to save checkpoints")
     parse.add_argument("--input_dim", type=int, default=2048, help="Input dimension of the projection head")
-    parse.add_argument("--data_dir", type=str, default="train/", help="Directory containing training data")
+    parse.add_argument("--data_dir", type=str, default="data/train", help="Directory containing training data")
     parse.add_argument("--batch_size", type=int, default=64, help="Batch size for training")
     parse.add_argument("--epochs", type=int, default=5, help="Number of epochs to train")
     parse.add_argument("--learning_rate", type=float, default=0.005, help="Learning rate for the optimizer")
     parse.add_argument("--weight_decay", type=float, default=1e-4, help="Weight decay for the optimizer")
     parse.add_argument("--temperature", type=float, default=0.07, help="Temperature for SupCon loss")
     parse.add_argument("--optimizer", type=str, default="SGD", choices=["SGD", "Adam"], help="Optimizer to use for training")
+    parse.add_argument("--image_size", type=int, default=32, help="Size of the input images (assumed square)")
     args = parse.parse_args()
     
 
@@ -126,8 +128,11 @@ if __name__ == '__main__':
     optimizer = args.optimizer
     # ------------------------------------------------
 
+    # compute dataset statistics
+    mean, std = compute_dataset_statistics(data_dir, image_size=args.image_size)
+
     # train_loader = get_dummy_loader(batch_size=10) # For testing purposes, replace with actual data loader
-    train_loader = get_data_loader(data_dir, batch_size=batch_size, is_train=True)
+    train_loader = get_data_loader(data_dir, batch_size=batch_size, is_train=True, image_size=args.image_size, mean=mean, std=std)
 
     config = {
             "learning_rate": learning_rate,

@@ -84,3 +84,32 @@ def get_data_loader(data_dir, batch_size=64, num_workers=4, is_train=True, image
 
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     return loader
+
+
+def compute_dataset_statistics(data_dir, image_size=32):
+    print(f"Computing dataset statistics for {data_dir}...")
+    full_training_data = ImageDataset(root=data_dir, transform=transforms.Compose([
+        transforms.Resize((image_size, image_size)),
+        transforms.ToTensor(),
+    ]))
+
+    images = torch.stack([image for image, _ in full_training_data], dim=3)
+    mean = torch.mean(images)
+    std = torch.std(images)
+
+    # Save statistics to file
+    torch.save({
+        'mean': mean,
+        'std': std
+    }, os.path.join('dataset_statistics.pth'))
+
+    return mean, std
+
+def load_data_statistics(stat_file, data_dir=None, image_size=32):
+    if os.path.exists(stat_file):
+        stat = torch.load(stat_file)
+        mean, std = stat['mean'], stat['std']
+    else:
+        # If statistics file does not exist, compute them
+        mean, std = compute_dataset_statistics(data_dir, image_size=image_size)
+    return mean, std

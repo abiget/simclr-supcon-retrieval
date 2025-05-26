@@ -6,11 +6,12 @@ from retrieve import get_query_embedding, find_similar_images_with_precomputed, 
 from utils.data_utils import ImageDataset
 from utils.load_model_utils import load_model
 from retrieve import evaluation_transform
+from utils.data_utils import load_data_statistics
 
-def top_k_accuracy(model, data_dir, k=5, device='cpu', transform=None, mean=[0.5]*3, std=[0.5]*3):
+def top_k_accuracy(model, data_dir, k=5, device='cpu', transform=None, img_size=32, mean=[0.5]*3, std=[0.5]*3):
 
     if transform is None:
-        transform = evaluation_transform(img_size=32, mean=mean, std=std)
+        transform = evaluation_transform(img_size=img_size, mean=mean, std=std)
 
     dataset = ImageDataset(root=data_dir, transform=transform)
 
@@ -74,10 +75,14 @@ if __name__ == "__main__":
     parser.add_argument('--model_path', default="checkpoints/supcon_experiment/supcon_model_final.pth", type=str, required=True, help='Path to the trained model')
     parser.add_argument('--k', type=int, default=5, help='Top K for accuracy evaluation')
     parser.add_argument('--device', type=str, default="cuda:0" if torch.cuda.is_available() else "cpu", help='Device to run the evaluation on')
+    parser.add_argument('--stat_file', type=str, default="dataset_statistics.pth", help='Path to the data statistics file')
 
     args = parser.parse_args()
+
+    mean, std = load_data_statistics(args.stat_file, data_dir=args.data_dir, image_size=args.image_size)
+
 
     # Load the model
     model = load_model(args.model_path, device=args.device, backbone_only=True)
     model.eval() # for safe measure, ensure model is in eval mode
-    top_k_accuracy(model, args.data_dir, k=args.k, device=args.device)
+    top_k_accuracy(model, args.data_dir, k=args.k, device=args.device, img_size=args.image_size, mean=mean, std=std)

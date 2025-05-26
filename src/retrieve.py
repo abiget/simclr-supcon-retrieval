@@ -9,6 +9,7 @@ from utils.plot_utils import plot_query_and_similars
 from utils.data_utils import get_data_loader
 from utils.load_model_utils import load_model
 from torch.utils.data import DataLoader, Dataset
+from utils.data_utils import compute_dataset_statistics, load_data_statistics
 
 def extract_backbone_features(model, images, device='cpu'):
     """Extract features from the backbone (encoder) only."""
@@ -93,32 +94,42 @@ def get_query_embedding(model, image_path, device='cpu'):
 if __name__ == "__main__":
     import argparse
 
-    argparser = argparse.ArgumentParser(description="Image Retrieval using SupCon Model")
-    argparser.add_argument("--model_path", type=str, default="checkpoints/supcon_experiment/supcon_model_final.pth", help="Path to the trained model")
-    argparser.add_argument("--gallery_dir", type=str, default="test/", help="Directory containing gallery images")
-    argparser.add_argument("--batch_size", type=int, default=64, help="Batch size for data loader")
-    argparser.add_argument("--test_dir", type=str, default="test/", help="Directory containing test images for retrieval")
-    argparser.add_argument("--top_k", type=int, default=5, help="Number of top similar images to retrieve")
-    argparser.add_argument("--device", type=str, default="cuda:0" if torch.cuda.is_available() else "cpu", help="Device to run the model on")
-    argparser.add_argument("--output_file", type=str, default="submission.json", help="Path to save the output JSON file")
-    args = argparser.parse_args()
+    parser = argparse.ArgumentParser(description="Image Retrieval using SupCon Model")
+    parser.add_argument("--model_path", type=str, default="checkpoints/supcon_experiment/supcon_model_final.pth", help="Path to the trained model")
+    parser.add_argument("--gallery_dir", type=str, default="data/test/gallery/", help="Directory containing gallery images")
+    parser.add_argument("--batch_size", type=int, default=64, help="Batch size for data loader")
+    parser.add_argument("--query_dir", type=str, default="data/test/query/", help="Directory containing query images for retrieval")
+    parser.add_argument("--top_k", type=int, default=5, help="Number of top similar images to retrieve")
+    parser.add_argument("--device", type=str, default="cuda:0" if torch.cuda.is_available() else "cpu", help="Device to run the model on")
+    parser.add_argument("--output_file", type=str, default="submission.json", help="Path to save the output JSON file")
+    parser.add_argument("--image_size", type=int, default=32, help="Size of the input images (assumed square)")
+    parser.add_argument("--stat_file", type=str, default="dataset_statistics.pth", help="Path to the dataset statistics file")
+    parser.add_argument("--data_dir", type=str, default="data/train/", help="Directory containing training images")
+    args = parser.parse_args()
     # Load the model
     device = args.device
 
+    if not os.path.exists(args.model_path):
+        raise FileNotFoundError(f"Model file not found at {args.model_path}. Please check the path.")
     model = load_model(args.model_path, device=device, backbone_only=True)
+
+    mean, std = load_data_statistics(args.stat_file, data_dir=args.data_dir, image_size=args.image_size)
 
     gallery_loader = get_data_loader(
         data_dir=args.gallery_dir,
         batch_size=args.batch_size,
         num_workers=4,
         is_train=False,
+        image_size=args.image_size,
+        mean=mean,
+        std=std
     )
 
-    # Precompute dataset embeddings 
+    # Precompute dataset embeddings
     dataset_features, dataset_paths = precompute_dataset_embeddings(model, gallery_loader.dataset, device=device)
 
     # # Process multiple query images efficiently
-    query_img_paths = [os.path.join(args.test_dir, img) for img in os.listdir(args.test_dir)]
+    query_img_paths = [os.path.join(args.query_dir, img) for img in os.listdir(args.query_dir) if img.lower().endswith(('.png', '.jpg', '.jpeg'))]
 
     results = []
 
