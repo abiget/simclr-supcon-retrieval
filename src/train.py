@@ -119,7 +119,7 @@ if __name__ == '__main__':
     parse.add_argument("--data_dir", type=str, default="data/train", help="Directory containing training data")
     parse.add_argument("--batch_size", type=int, default=64, help="Batch size for training")
     parse.add_argument("--epochs", type=int, default=5, help="Number of epochs to train")
-    parse.add_argument("--learning_rate", type=float, default=0.005, help="Learning rate for the optimizer")
+    parse.add_argument("--learning_rate", type=float, default=0.0001, help="Learning rate for the optimizer")
     parse.add_argument("--weight_decay", type=float, default=1e-4, help="Weight decay for the optimizer")
     parse.add_argument("--temperature", type=float, default=0.07, help="Temperature for SupCon loss")
     parse.add_argument("--optimizer", type=str, default="SGD", choices=["SGD", "Adam"], help="Optimizer to use for training")

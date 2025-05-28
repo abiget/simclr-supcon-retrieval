@@ -10,6 +10,7 @@ from utils.data_utils import get_data_loader
 from utils.load_model_utils import load_model
 from torch.utils.data import DataLoader, Dataset
 from utils.data_utils import compute_dataset_statistics, load_data_statistics
+from submit import submit
 
 def extract_backbone_features(model, images, device='cpu'):
     """Extract features from the backbone (encoder) only."""
@@ -111,6 +112,8 @@ if __name__ == "__main__":
 
     if not os.path.exists(args.model_path):
         raise FileNotFoundError(f"Model file not found at {args.model_path}. Please check the path.")
+    
+    # Load the model, assuming it has a method to load the full model
     model = load_model(args.model_path, device=device, backbone_only=True)
 
     mean, std = load_data_statistics(args.stat_file, data_dir=args.data_dir, image_size=args.image_size)
@@ -157,3 +160,14 @@ if __name__ == "__main__":
     # Write to JSON file
     with open(args.output_file, 'w') as f:
         json.dump(results, f, indent=2)
+
+    # load the json file into dict and submit the results
+    with open(args.output_file, 'r') as f:
+        submission_data = json.load(f)
+    
+    group_name = "beasts" 
+
+    print(f"Submitting results for group: {group_name}")
+    print(submission_data)
+
+    # submit(submission_data, group_name)
