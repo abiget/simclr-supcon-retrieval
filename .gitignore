@@ -6,6 +6,7 @@ __pycache__/
 .venv/
 checkpoints/
 wandb/
-test/
-train/
 resnet50-1x.pth
+test.zip
+train.zip
+original_dataset/
