@@ -21,15 +21,15 @@ class SupConModel(nn.Module):
         return z
 
     @classmethod
-    def from_resnet_checkpoint(cls, checkpoint_path, input_dim=2048, proj_dim=128, device="cpu"):
+    def from_resnet_checkpoint(cls, pretrained_path, input_dim=2048, proj_dim=256, device="cpu"):
         """Factory method to create a pre-trained model"""
-        backbone = SimCLRBackbone(checkpoint_path=checkpoint_path)
+        backbone = SimCLRBackbone(checkpoint_path=pretrained_path)
         proj_head = ProjectionHead(input_dim=input_dim, proj_dim=proj_dim)
         model = cls(backbone, proj_head)
         return model.to(device)
-    
+
     @classmethod
-    def load_trained_model(cls, model_path, input_dim=2048, proj_dim=128, device="cpu"):
+    def load_trained_model(cls, model_path, input_dim=2048, proj_dim=256, device="cpu"):
         """
         Load a fully trained SupConModel from a saved checkpoint.
         This loads both backbone and projection head weights.
@@ -40,7 +40,7 @@ class SupConModel(nn.Module):
         model = cls(backbone, proj_head)
         
         # Then load the state dictionary
-        state_dict = torch.load(model_path, map_location=device)
-        model.load_state_dict(state_dict)
+        state_dict = torch.load(model_path, map_location=device, weights_only=False)
+        model.load_state_dict(state_dict, strict=False)
         
         return model.to(device)

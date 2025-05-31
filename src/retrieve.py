@@ -96,14 +96,14 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Image Retrieval using SupCon Model")
-    parser.add_argument("--model_path", type=str, default="checkpoints/supcon_experiment/supcon_model_final.pth", help="Path to the trained model")
+    parser.add_argument("--model_path", type=str, default="checkpoints/supcon_experiment1/supcon_model_final.pth", help="Path to the trained model")
     parser.add_argument("--gallery_dir", type=str, default="data/test/gallery/", help="Directory containing gallery images")
     parser.add_argument("--batch_size", type=int, default=64, help="Batch size for data loader")
     parser.add_argument("--query_dir", type=str, default="data/test/query/", help="Directory containing query images for retrieval")
-    parser.add_argument("--top_k", type=int, default=5, help="Number of top similar images to retrieve")
+    parser.add_argument("--top_k", type=int, default=10, help="Number of top similar images to retrieve")
     parser.add_argument("--device", type=str, default="cuda:0" if torch.cuda.is_available() else "cpu", help="Device to run the model on")
     parser.add_argument("--output_file", type=str, default="submission.json", help="Path to save the output JSON file")
-    parser.add_argument("--image_size", type=int, default=32, help="Size of the input images (assumed square)")
+    parser.add_argument("--image_size", type=int, default=64, help="Size of the input images (assumed square)")
     parser.add_argument("--stat_file", type=str, default="dataset_statistics.pth", help="Path to the dataset statistics file")
     parser.add_argument("--data_dir", type=str, default="data/train/", help="Directory containing training images")
     args = parser.parse_args()
@@ -130,13 +130,22 @@ if __name__ == "__main__":
 
     # Precompute dataset embeddings
     dataset_features, dataset_paths = precompute_dataset_embeddings(model, gallery_loader.dataset, device=device)
+    labels = gallery_loader.dataset.classes if gallery_loader.dataset.use_folders else None
 
     # # Process multiple query images efficiently
-    query_img_paths = [os.path.join(args.query_dir, img) for img in os.listdir(args.query_dir) if img.lower().endswith(('.png', '.jpg', '.jpeg'))]
+    query_dataset = get_data_loader(
+        data_dir=args.query_dir,
+        batch_size=1,  # Process one image at a time
+        num_workers=4,
+        is_train=False,
+        image_size=args.image_size,
+        mean=mean,
+        std=std
+    ).dataset
 
     results = []
 
-    for query_img_path in tqdm(query_img_paths, desc="Processing queries"):
+    for query_img_path, label in tqdm(query_dataset.samples, desc="Processing queries"):
         # Get embedding for query
         query_feature = get_query_embedding(model, query_img_path, device=device)
         
@@ -146,10 +155,12 @@ if __name__ == "__main__":
         )
 
         # Extract just the filenames for similar images
-        similar_filenames = [os.path.basename(path) for path, _ in similar_images]
+        # similar_filenames = [os.path.basename(path) for path, _ in similar_images]
+        similar_filenames = [path for path, _ in similar_images]
         
         results.append({
             "filename": os.path.basename(query_img_path),
+            "label": query_dataset.classes[label] if query_dataset.use_folders else label,
             "samples": similar_filenames
         })
 
@@ -168,6 +179,6 @@ if __name__ == "__main__":
     group_name = "beasts" 
 
     print(f"Submitting results for group: {group_name}")
-    print(submission_data)
+    # print(submission_data)
 
     # submit(submission_data, group_name)

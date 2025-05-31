@@ -8,7 +8,7 @@ class ProjectionHead(nn.Module):
         input_dim (int): Dimension of the input features (output of SimCLR).
         proj_dim (int): Dimension of the projected features.
     """
-    def __init__(self, input_dim, proj_dim=128):
+    def __init__(self, input_dim=4096, proj_dim=256):
         super().__init__()
         self.mlp = nn.Sequential(
             nn.Linear(input_dim, 512),

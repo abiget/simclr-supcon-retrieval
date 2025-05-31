@@ -14,7 +14,7 @@ class SimCLRBackbone(nn.Module):
         self.encoder = models.resnet50()
         self.encoder.fc = nn.Identity()  # Remove classification head
         if checkpoint_path is not None:
-            ckpt = torch.load(checkpoint_path, map_location="cpu")
+            ckpt = torch.load(checkpoint_path, map_location='cpu' if not torch.cuda.is_available() else 'cuda:0')
             state_dict = ckpt['state_dict'] if 'state_dict' in ckpt else ckpt
             self.encoder.load_state_dict(state_dict, strict=False)
 

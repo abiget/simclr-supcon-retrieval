@@ -1,6 +1,13 @@
-ipykernel==6.29.5
-matplotlib==3.10.3
-torchaudio==2.7.0+cu128
-torchvision==0.22.0+cu128
-tqdm==4.67.1
-wandb==0.19.11
+numpy
+pandas
+wandb
+matplotlib
+tqdm
+scikit-learn
+facenet-pytorch
+Pillow
+torch
+torchvision
+torchaudio
+# Use the extra index URL for PyTorch CUDA wheels
+--extra-index-url https://download.pytorch.org/whl/cu128

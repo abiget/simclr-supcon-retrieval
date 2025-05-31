@@ -1,10 +1,14 @@
 import os
+import shutil
 import torch
 from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
 from torchvision import transforms
 from torch.utils.data import Dataset
 from PIL import Image
+from sklearn.model_selection import train_test_split
+import numpy as np
+import os.path as osp
 
 class ImageDataset(Dataset):
     classes = None
@@ -82,7 +86,7 @@ def get_data_loader(data_dir, batch_size=64, num_workers=4, is_train=True, image
     dataset = ImageDataset(root=data_dir, transform=transform)
     print(f"Found {len(dataset)} images {'across ' + str(len(dataset.classes)) + ' classes' if dataset.use_folders  else ''}")
 
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True if is_train else False, num_workers=num_workers)
     return loader
 
 
@@ -113,3 +117,88 @@ def load_data_statistics(stat_file, data_dir=None, image_size=32):
         # If statistics file does not exist, compute them
         mean, std = compute_dataset_statistics(data_dir, image_size=image_size)
     return mean, std
+
+
+def split_and_organize_dataset(src_dir, dest_dir, test_size=0.2, random_state=42):
+    """
+    Split dataset into train and test sets and physically move files to new directories.
+    
+    Args:
+        src_dir: Source directory containing the dataset
+        dest_dir: Destination parent directory where train/ and test/ folders will be created
+        test_size: Proportion of the dataset to be used for testing
+        random_state: Random seed for reproducibility
+    
+    Returns:
+        train_dir, test_dir: Paths to the train and test directories
+    """
+    # Create destination directories
+    train_dir = osp.join(dest_dir, 'train')
+    test_dir = osp.join(dest_dir, 'test')
+    
+    # Make sure destination exists
+    os.makedirs(dest_dir, exist_ok=True)
+    os.makedirs(train_dir, exist_ok=True)
+    os.makedirs(test_dir, exist_ok=True)
+    
+    # Load dataset to get sample information
+    dataset = ImageDataset(root=src_dir)
+    
+    if dataset.use_folders:
+        # Create class directories in train and test folders
+        for class_name in dataset.classes:
+            os.makedirs(osp.join(train_dir, class_name), exist_ok=True)
+            os.makedirs(osp.join(test_dir, class_name), exist_ok=True)
+        
+        # Group samples by class
+        class_samples = {}
+        for path, label in dataset.samples:
+            class_name = dataset.classes[label]
+            if class_name not in class_samples:
+                class_samples[class_name] = []
+            class_samples[class_name].append(path)
+        
+        # Split and move each class
+        for class_name, paths in class_samples.items():
+            train_paths, test_paths = train_test_split(
+                paths, test_size=test_size, random_state=random_state
+            )
+            
+            # Move training files
+            for src_path in train_paths:
+                filename = osp.basename(src_path)
+                dest_path = osp.join(train_dir, class_name, filename)
+                shutil.copy2(src_path, dest_path)
+                
+            # Move testing files
+            for src_path in test_paths:
+                filename = osp.basename(src_path)
+                dest_path = osp.join(test_dir, class_name, filename)
+                shutil.copy2(src_path, dest_path)
+                
+            print(f"Class {class_name}: {len(train_paths)} training, {len(test_paths)} testing")
+            
+    else:
+        # For unstructured data, just do random split
+        paths = [path for path, _ in dataset.samples]
+        train_paths, test_paths = train_test_split(
+            paths, test_size=test_size, random_state=random_state
+        )
+        
+        # Move training files
+        for src_path in train_paths:
+            filename = osp.basename(src_path)
+            dest_path = osp.join(train_dir, filename)
+            shutil.copy2(src_path, dest_path)
+            
+        # Move testing files
+        for src_path in test_paths:
+            filename = osp.basename(src_path)
+            dest_path = osp.join(test_dir, filename)
+            shutil.copy2(src_path, dest_path)
+    
+    print(f"Dataset split complete!")
+    print(f"Training data: {train_dir}")
+    print(f"Testing data: {test_dir}")
+    
+    return train_dir, test_dir
