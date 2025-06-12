@@ -99,8 +99,8 @@ Our experimental workflow consisted of three main phases:
 | FaceNet (pretrained, no fine-tuning) | Competition Data | 78.10 | Best performance on competition data |
 | ResNet-50 (SimCLR pretrained) | Competition Data | 9.55 | Initial baseline, domain mismatch |
 | ResNet-50 (SimCLR + 50 epochs SupCon) | Competition Data | 18.42 | Limited by extremely scarce data (1 image/class) |
-| ResNet-50 (SimCLR pretrained) | Intel Image | 63.00 | Strong baseline due to dataset similarity with ImageNet |
-| ResNet-50 (SimCLR + SupCon fine-tuned) | Intel Image | 98.78 | Excellent performance with sufficient data |
+| ResNet-50 (SimCLR pretrained) | Intel Image | Top-3: 63.00 | Strong baseline due to dataset similarity with ImageNet |
+| ResNet-50 (SimCLR + SupCon fine-tuned) | Intel Image | Top-3: 98.78 | Excellent performance with sufficient data |
 
 Note: The performance differences can be attributed to two key factors:
 
@@ -182,6 +182,7 @@ This implementation builds upon the following excellent repositories:
 
 1. [SupContrast](https://github.com/HobbitLong/SupContrast) - Implementation of Supervised Contrastive Learning
 2. [facenet-pytorch](https://github.com/timesler/facenet-pytorch) - PyTorch implementation of FaceNet used for baseline comparison
+3. [lightly-ai/simclr](https://huggingface.co/lightly-ai/simclrv1-imagenet1k-resnet50-1x) - Pretrained SimCLR ResNet-50 weights for feature extraction
 
 ## References
 

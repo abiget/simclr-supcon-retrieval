@@ -9,7 +9,11 @@ wandb/
 resnet50-1x.pth
 test.zip
 train.zip
-data/
+data/train.zip
+data/data_prev
+data/intel_dataset
+data/test_original
+data/competition/train
 test_notebook.ipynb
 data.zip
 dataset_statistics.pth
