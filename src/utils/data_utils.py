@@ -31,7 +31,7 @@ class ImageDataset(Dataset):
                     if fname.lower().endswith(('.png', '.jpg', '.jpeg')):
                         self.samples.append((os.path.join(cls_path, fname), self.class_to_idx[class_name]))
         else:
-            # No fis_trainolders: just load images with label = None
+            # if no: just load images with label = None
             self.use_folders = False
             self.samples = [
                 (os.path.join(root, fname), None)
@@ -219,3 +219,63 @@ def split_and_organize_dataset(src_dir, dest_dir, test_size=0.2, random_state=42
     print(f"Testing data: {test_dir}")
     
     return train_dir, test_dir
+
+
+def split_test_data_into_query_and_gallery(test_dir, query_ratio=0.4):
+    """
+    Splits the test dataset into query and gallery sets.
+    Args:
+        test_dir (str): Directory containing the test dataset.
+        query_ratio (float): Proportion of each class to use as query images.
+    Returns:
+        query_dir (str): Directory containing query images.
+        gallery_dir (str): Directory containing gallery images.
+    """
+    if not os.path.exists(test_dir):
+        raise ValueError(f"Test directory {test_dir} does not exist.")
+    
+    # Create directories for query and gallery
+    query_dir = osp.join(test_dir, 'query')
+    gallery_dir = osp.join(test_dir, 'gallery')
+
+    # Ensure the directories exist
+    os.makedirs(query_dir, exist_ok=True)
+    os.makedirs(gallery_dir, exist_ok=True)
+    
+    # Load the dataset to get class names
+    dataset = ImageDataset(root=test_dir)
+
+    # move images to query and gallery directories
+    print(f"Splitting test data into query and gallery sets with ratio {query_ratio} for each class...")
+    for class_name in dataset.classes:
+        class_dir = osp.join(test_dir, class_name)
+        if not os.path.exists(class_dir):
+            continue
+        
+        # Get all image paths in the class directory
+        all_images = [osp.join(class_dir, fname) for fname in os.listdir(class_dir) if fname.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        
+        # Shuffle and split images into query and gallery sets
+        np.random.shuffle(all_images)
+        split_index = int(len(all_images) * query_ratio)
+        
+        query_images = all_images[:split_index]
+        gallery_images = all_images[split_index:]
+
+        print(f"1 image path: {query_images[0] if query_images else 'None'}")
+        print(f"1 image path: {gallery_images[0] if gallery_images else 'None'}")
+
+        
+        # Move images along with their directory to respective directories
+        os.makedirs(osp.join(query_dir, class_name), exist_ok=True)
+        os.makedirs(osp.join(gallery_dir, class_name), exist_ok=True)
+
+        for img_path in query_images:
+            shutil.copy2(img_path, osp.join(query_dir, class_name))
+        for img_path in gallery_images:
+            shutil.copy2(img_path, osp.join(gallery_dir, class_name))
+
+    print(f"Query images saved to: {query_dir}")
+    print(f"Gallery images saved to: {gallery_dir}")
+
+    return query_dir, gallery_dir
