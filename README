@@ -44,3 +44,17 @@ This project implements an image retrieval system that combines SimCLR pre-train
 
 ## License
 [MIT License](LICENSE)
+
+resnet pretrained
+accuracy is 23.16151202749141
+simclr pretrained
+accuracy is 9.553264604810996
+facenet
+accuracy is 781.0309278350516
+simclr with 50 epochs fine tuned
+accuracy is 18.419243986254294
+resnet with 50 epochs fine tuned
+accuracy is 21.85567010309278
+resnet with 100 epochs
+accuracy is 18.006872852233677
+

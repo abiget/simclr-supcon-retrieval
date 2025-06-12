@@ -1,19 +1,27 @@
 import os
 import json
 import torch
+import argparse
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
 from torchvision import transforms
-from utils.plot_utils import plot_query_and_similars
 from utils.data_utils import get_data_loader
 from utils.load_model_utils import load_model
 from torch.utils.data import DataLoader, Dataset
-from utils.data_utils import compute_dataset_statistics, load_data_statistics
+from utils.data_utils import load_data_statistics
 from submit import submit
 
 def extract_backbone_features(model, images, device='cpu'):
-    """Extract features from the backbone (encoder) only."""
+    """
+    Extract embeddings from the model's backbone.
+    Args:
+        model (nn.Module): The model from which to extract embeddings.
+        images (torch.Tensor): Input images of shape [batch_size, channels, height, width].
+        device (str): Device to run the model on ('cpu' or 'cuda').
+    Returns:
+        np.ndarray: Extracted embeddings as a NumPy array.
+    """
     model.eval()
     with torch.no_grad():
         # If model is SupConModel, get backbone
@@ -23,8 +31,17 @@ def extract_backbone_features(model, images, device='cpu'):
             features = model(images.to(device))
     return features.cpu().numpy()
 
-def evaluation_transform(img_size=32, mean=[0.5]*3, std=[0.5]*3):
-    """Transform for evaluation, resizing and normalizing images."""
+def evaluation_transform(img_size=160, mean=[0.5]*3, std=[0.5]*3):
+    """
+    Create a transform for evaluation.
+    Args:
+        img_size (int): Size of the input images (assumed square).
+        mean (list): Mean values for normalization.
+        std (list): Standard deviation values for normalization.
+    Returns:
+        transforms.Compose: A composed transform for evaluation.
+    """
+
     return transforms.Compose([
         transforms.Resize((img_size, img_size)),
         transforms.ToTensor(),
@@ -34,15 +51,19 @@ def evaluation_transform(img_size=32, mean=[0.5]*3, std=[0.5]*3):
 def normalize_feature(feature):
     return feature / np.linalg.norm(feature, axis=1, keepdims=True)
 
-def precompute_dataset_embeddings(model, dataset, device='cpu'):
+def precompute_dataset_embeddings(model, dataset, device='cpu', img_size=160):
     """
-    Precompute embeddings for all images in the dataset.
-    Returns features array and corresponding paths.
+    Precompute embeddings for the entire gallery dataset.
+    Args:
+        model (nn.Module): The model to use for feature extraction.
+        dataset (Dataset): The dataset containing images.
+        device (str): Device to run the model on ('cpu' or 'cuda').
+        img_size (int): Size of the input images (assumed square).
     """
     model.eval()
     model = model.to(device)
 
-    transform = evaluation_transform()
+    transform = evaluation_transform(img_size=img_size)
 
     all_features = []
     all_paths = []
@@ -62,7 +83,14 @@ def precompute_dataset_embeddings(model, dataset, device='cpu'):
 
 def find_similar_images_with_precomputed(query_feature, all_features, all_paths, top_k=5):
     """
-    Find most similar images using precomputed features.
+    Find top K similar images using precomputed features.
+    Args:
+        query_feature (np.ndarray): Feature vector of the query image.
+        all_features (np.ndarray): Precomputed features of the dataset.
+        all_paths (list): List of paths corresponding to the precomputed features.
+        top_k (int): Number of top similar images to retrieve.
+    Returns:
+        list: List of tuples containing (image_path, similarity_score) for top K similar images.
     """
     # Compute cosine similarity since normalized features are used
     similarities = np.dot(all_features, query_feature.T).flatten()
@@ -73,15 +101,22 @@ def find_similar_images_with_precomputed(query_feature, all_features, all_paths,
 
     return similar_images
 
-def get_query_embedding(model, image_path, device='cpu'):
+def get_query_embedding(model, image_path, device='cpu', img_size=160):
     """
-    Get embedding for a query image.
+    Get the embedding for a single query image.
+    Args:
+        model (nn.Module): The model to use for feature extraction.
+        image_path (str): Path to the query image.
+        device (str): Device to run the model on ('cpu' or 'cuda').
+        img_size (int): Size of the input images (assumed square).
+    Returns:
+        np.ndarray: Normalized feature vector for the query image.
     """
     model.eval()
     model = model.to(device)
-    
-    transform = evaluation_transform()
-    
+
+    transform = evaluation_transform(img_size=img_size)
+
     # Extract feature for the query image
     image = Image.open(image_path).convert('RGB')
     image_tensor = transform(image).unsqueeze(0).to(device)
@@ -93,31 +128,33 @@ def get_query_embedding(model, image_path, device='cpu'):
 
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Image Retrieval using SupCon Model")
-    parser.add_argument("--model_path", type=str, default="checkpoints/supcon_experiment1/supcon_model_final.pth", help="Path to the trained model")
+    """Main function to run the image retrieval process."""
+    parser = argparse.ArgumentParser(description="Image Retrieval using SupCon finetune Model or Facenet")
+    parser.add_argument("--model_path", type=str, default="checkpoints/supcon_experiment_final/supcon_model_final.pth", help="Path to the trained model")
     parser.add_argument("--gallery_dir", type=str, default="data/test/gallery/", help="Directory containing gallery images")
     parser.add_argument("--batch_size", type=int, default=64, help="Batch size for data loader")
     parser.add_argument("--query_dir", type=str, default="data/test/query/", help="Directory containing query images for retrieval")
     parser.add_argument("--top_k", type=int, default=10, help="Number of top similar images to retrieve")
     parser.add_argument("--device", type=str, default="cuda:0" if torch.cuda.is_available() else "cpu", help="Device to run the model on")
-    parser.add_argument("--output_file", type=str, default="submission.json", help="Path to save the output JSON file")
-    parser.add_argument("--image_size", type=int, default=64, help="Size of the input images (assumed square)")
-    parser.add_argument("--stat_file", type=str, default="dataset_statistics.pth", help="Path to the dataset statistics file")
+    parser.add_argument("--output_file", type=str, default="results/submission.json", help="Path to save the output JSON file")
+    parser.add_argument("--image_size", type=int, default=160, help="Size of the input images (assumed square)")
+    parser.add_argument("--stat_file", type=str, default="results/dataset_statistics.pth", help="Path to the dataset statistics file")
     parser.add_argument("--data_dir", type=str, default="data/train/", help="Directory containing training images")
+    parser.add_argument("--model_type", type=str, default="facenet", choices=["simclr", "facenet", "simclr-tuned"], help="Type of model to load (simclr or facenet)")
     args = parser.parse_args()
     # Load the model
     device = args.device
 
-    if not os.path.exists(args.model_path):
+    if not args.model_type in ["facenet", "simclr"] and not os.path.exists(args.model_path):
         raise FileNotFoundError(f"Model file not found at {args.model_path}. Please check the path.")
     
     # Load the model, assuming it has a method to load the full model
-    model = load_model(args.model_path, device=device, backbone_only=True)
+    model = load_model(args.model_path, device=device, backbone_only=True, model_type=args.model_type)
 
+    # compute or load dataset statistics
     mean, std = load_data_statistics(args.stat_file, data_dir=args.data_dir, image_size=args.image_size)
 
+    # get the gallery data loader
     gallery_loader = get_data_loader(
         data_dir=args.gallery_dir,
         batch_size=args.batch_size,
@@ -129,7 +166,7 @@ if __name__ == "__main__":
     )
 
     # Precompute dataset embeddings
-    dataset_features, dataset_paths = precompute_dataset_embeddings(model, gallery_loader.dataset, device=device)
+    dataset_features, dataset_paths = precompute_dataset_embeddings(model, gallery_loader.dataset, device=device, img_size=args.image_size)
     labels = gallery_loader.dataset.classes if gallery_loader.dataset.use_folders else None
 
     # # Process multiple query images efficiently
@@ -144,7 +181,9 @@ if __name__ == "__main__":
     ).dataset
 
     results = []
+    submission_dict = {}
 
+    # Iterate over each query image and find similar images
     for query_img_path, label in tqdm(query_dataset.samples, desc="Processing queries"):
         # Get embedding for query
         query_feature = get_query_embedding(model, query_img_path, device=device)
@@ -155,30 +194,24 @@ if __name__ == "__main__":
         )
 
         # Extract just the filenames for similar images
-        # similar_filenames = [os.path.basename(path) for path, _ in similar_images]
-        similar_filenames = [path for path, _ in similar_images]
+        similar_filenames = [os.path.basename(path) for path, _ in similar_images]
         
+        # save results for custom dataset testing
         results.append({
             "filename": os.path.basename(query_img_path),
             "label": query_dataset.classes[label] if query_dataset.use_folders else label,
-            "samples": similar_filenames
+            "samples": [path for path, _ in similar_images]
         })
 
-        # Display results if needed
-        # print(f"Similar images for: {query_img_path}")
-        # plot_query_and_similars(query_img_path, similar_images)
-    
+        # Prepare submission data
+        submission_dict[os.path.basename(query_img_path)] = similar_filenames
+
     # Write to JSON file
     with open(args.output_file, 'w') as f:
         json.dump(results, f, indent=2)
 
-    # load the json file into dict and submit the results
-    with open(args.output_file, 'r') as f:
-        submission_data = json.load(f)
-    
-    group_name = "beasts" 
+    group_name = "Beasts"
 
     print(f"Submitting results for group: {group_name}")
-    # print(submission_data)
 
-    # submit(submission_data, group_name)
+    submit(submission_dict, group_name)

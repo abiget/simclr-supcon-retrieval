@@ -9,4 +9,4 @@ wandb/
 resnet50-1x.pth
 test.zip
 train.zip
-original_dataset/
+data/
