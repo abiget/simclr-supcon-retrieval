@@ -10,3 +10,4 @@ resnet50-1x.pth
 test.zip
 train.zip
 data/
+test_notebook.ipynb
