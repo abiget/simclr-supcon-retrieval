@@ -49,19 +49,24 @@ This project explores different approaches to image retrieval, comparing the eff
 
 ## Model Architecture
 
-We experimented with two different approaches, each with distinct advantages for different types of data:
+We experimented with three different approaches:
 
-1. **ResNet-50 with SimCLR**:
+1. **ResNet-50 with SimCLR Pretraining**:
    - Backbone: ResNet-50 pretrained using SimCLR on ImageNet
-   - Projection Head: MLP with structure [2048 → 512 → 128]
-   - Training: Fine-tuned with Supervised Contrastive Loss
+   - No fine-tuning, used as baseline
    - Best suited for: Natural image datasets similar to ImageNet domain
 
-2. **FaceNet Model**:
+2. **FaceNet Pretrained**:
    - Used pretrained FaceNet model
    - Direct evaluation on competition dataset without fine-tuning
    - Specialized for face recognition tasks
    - Better suited for: Face-specific image retrieval
+
+3. **SimCLR Fine-tuned with SupCon**:
+   - ResNet-50 backbone with SimCLR pretraining
+   - Fine-tuned using Supervised Contrastive Loss
+   - Projection Head: MLP with structure [2048 → 512 → 128]
+   - Optimized for: Better feature learning on target dataset
 
 This architecture comparison revealed how model performance is heavily influenced by the alignment between pretraining domain and target dataset characteristics.
 
@@ -128,26 +133,26 @@ The t-SNE visualizations below demonstrate the embedding space organization. The
 
 ### Evaluation
 
-#### 1. ResNet-50 (SimCLR) Pretrained Evaluation
+#### 1. SimCLR Pretrained ResNet-50
 
 ```bash
-python src/retrieve.py --model simclr --weights resnet50-1x.pth \
+python src/retrieve.py --model_type simclr --weights resnet50-1x.pth \
     --query_dir data/competition/test/query \
     --gallery_dir data/competition/test/gallery
 ```
 
-#### 2. FaceNet Evaluation
+#### 2. FaceNet Pretrained
 
 ```bash
-python src/retrieve.py --model facenet \
+python src/retrieve.py --model_type facenet \
     --query_dir data/competition/test/query \
     --gallery_dir data/competition/test/gallery
 ```
 
-#### 3. Fine-tuned SimCLR+SupCon Evaluation
+#### 3. SimCLR Fine-tuned with SupCon
 
 ```bash
-python src/retrieve.py --model simclr_supcon \
+python src/retrieve.py --model_type supcon-tuned \
     --weights checkpoints/supcon_experiment/supcon_model_final.pth \
     --query_dir data/competition/test/query \
     --gallery_dir data/competition/test/gallery
