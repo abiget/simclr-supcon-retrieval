@@ -176,7 +176,7 @@ if __name__ == "__main__":
 
     # Precompute dataset embeddings
     dataset_features, dataset_paths = precompute_dataset_embeddings(model, gallery_loader.dataset, device=device, img_size=args.image_size)
-    labels = gallery_loader.dataset.classes if gallery_loader.dataset.use_folders else None
+    # labels = gallery_loader.dataset.classes if gallery_loader.dataset.use_folders else None
 
     # # Process multiple query images efficiently
     query_dataset = get_data_loader(
@@ -226,6 +226,25 @@ if __name__ == "__main__":
 
         submit(submission_dict, group_name)
     else:
-        top_accuracy = calculate_top_k_accuracy(args.output_file, top_k=args.top_k)
-        print(f"Top-{args.top_k} accuracy for custom dataset: {top_accuracy}%")
+        # custom labelled dataset evaluation
+        top_k_accuracy, top_k_accuracy_per_class = calculate_top_k_accuracy(args.output_file, top_k=args.top_k)
+        print(f"Top-{args.top_k} accuracy for custom dataset: {top_k_accuracy}%")
+        print(f'Top-{args.top_k} Accuracy per Class:')
 
+        for cls, acc in top_k_accuracy_per_class.items():
+            print(f'  {cls}: {acc:.2f}%')
+
+        # visualize the embeddings using t-SNE
+        from evaluate import visualize_embeddings_with_tsne
+
+        feature_labels = []
+        for path in dataset_paths:
+            label = os.path.basename(os.path.dirname(path))
+            feature_labels.append(label)
+
+        # Visualize embeddings with t-SNE
+        visualize_embeddings_with_tsne(
+            features=dataset_features,
+            labels=feature_labels,
+            title="t-SNE Visualization - Intel Image Dataset Embeddings"
+        )
