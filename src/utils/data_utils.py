@@ -76,12 +76,14 @@ def get_data_loader(data_dir, batch_size=64, num_workers=4, is_train=True, image
 
     if is_train:
         base_transform = transforms.Compose([
+            # include all used in simclr and supervised contrastive learning
+            transforms.Resize((image_size, image_size)),
             transforms.RandomResizedCrop(image_size),
             transforms.RandomHorizontalFlip(),
             transforms.RandomApply([
                 transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.2)
             ], p=0.8),
-            # transforms.GaussianBlur(kernel_size=3),
+            transforms.GaussianBlur(kernel_size=3),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
         ])
@@ -89,7 +91,7 @@ def get_data_loader(data_dir, batch_size=64, num_workers=4, is_train=True, image
         transform = TwoCropTransform(base_transform)
     else:
         transform = transforms.Compose([
-            transforms.CenterCrop(image_size),
+            transforms.Resize((image_size, image_size)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
         ])
