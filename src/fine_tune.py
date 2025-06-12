@@ -128,7 +128,7 @@ def download_simclr_checkpoint(pretrained_path="resnet50-1x.pth"):
 if __name__ == '__main__':
     parse = argparse.ArgumentParser(description="Train a SupCon model.")
     parse.add_argument("--device", type=str, default="cuda:0" if torch.cuda.is_available() else "cpu", help="Device to use for training")
-    parse.add_argument("--run_name", type=str, default="supcon_experiment_final", help="Name of the run for WandB")
+    parse.add_argument("--run_name", type=str, default="supcon_experiment_intel_data", help="Name of the run for WandB")
     parse.add_argument("--checkpoint_path", type=str, default="checkpoints", help="Path to save checkpoints")
     parse.add_argument("--pretrained_path", type=str, default="resnet50-1x.pth", help="Path to the pre-trained weights file")
     parse.add_argument("--input_dim", type=int, default=2048, help="Input dimension of the projection head which is the output of resnet50")
