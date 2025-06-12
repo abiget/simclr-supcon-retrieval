@@ -76,7 +76,7 @@ Our experimental workflow consisted of three main phases:
 
 1. **Initial Evaluation on Competition Data**:
    - Evaluated pretrained SimCLR (ResNet-50 backbone) - achieved 9.55% accuracy
-   - Evaluated pretrained FaceNet model - achieved 78.10% accuracy
+   - Evaluated pretrained FaceNet model - achieved 781 accuracy
    - FaceNet showed significantly better performance without any fine-tuning
 
 2. **Competition Data Fine-tuning Attempt**:
@@ -86,25 +86,26 @@ Our experimental workflow consisted of three main phases:
 
 3. **Intel Image Dataset Validation**:
    - To verify our approach, we switched to the larger Intel Image Classification dataset
-   - Initial evaluation with pretrained SimCLR showed strong 63% accuracy, likely due to:
+   - Initial evaluation with pretrained SimCLR showed strong 68.8% accuracy, likely due to:
      - Intel dataset's similarity to ImageNet's general-purpose nature
      - Better alignment with SimCLR's pretraining on natural images
-   - After fine-tuning with SupCon loss, achieved excellent 98.78% accuracy
+   - After fine-tuning with SupCon loss, achieved excellent 97.77% accuracy
    - This dramatic improvement validated our approach, confirming that performance was primarily limited by data availability in the competition dataset
 
 ### Model Performance Comparison
+The first three results on the competition data is based on the evaluation metrics given on the comptition(the evaluation server results).
 
 | Model Configuration | Dataset | Accuracy (%) | Notes |
 |-------------------|----------|-------------|--------|
-| FaceNet (pretrained, no fine-tuning) | Competition Data | 78.10 | Best performance on competition data |
+| FaceNet (pretrained, no fine-tuning) | Competition Data | 781 | Best performance on competition data |
 | ResNet-50 (SimCLR pretrained) | Competition Data | 9.55 | Initial baseline, domain mismatch |
 | ResNet-50 (SimCLR + 50 epochs SupCon) | Competition Data | 18.42 | Limited by extremely scarce data (1 image/class) |
-| ResNet-50 (SimCLR pretrained) | Intel Image | Top-3: 63.00 | Strong baseline due to dataset similarity with ImageNet |
-| ResNet-50 (SimCLR + SupCon fine-tuned) | Intel Image | Top-3: 98.78 | Excellent performance with sufficient data |
+| ResNet-50 (SimCLR pretrained) | Intel Image | Top-3: 68.8 | Strong baseline due to dataset similarity with ImageNet |
+| ResNet-50 (SimCLR + SupCon fine-tuned) | Intel Image | Top-3: 97.77 | Excellent performance with sufficient data |
 
 Note: The performance differences can be attributed to two key factors:
 
-1. Dataset Domain: SimCLR's pretrained weights performed better on Intel dataset (63%) versus competition data (9.55%) due to its similarity with ImageNet-style natural images
+1. Dataset Domain: SimCLR's pretrained weights performed better on Intel dataset (68.8%) versus competition data (9.55%) due to its similarity with ImageNet-style natural images
 2. Training Data Availability: The competition dataset's extreme scarcity (1 image per class) severely limited fine-tuning potential, while the Intel dataset provided sufficient examples for effective learning
 
 ### Visualization Results
@@ -136,9 +137,17 @@ The t-SNE visualizations below demonstrate the embedding space organization. The
 #### 1. SimCLR Pretrained ResNet-50
 
 ```bash
-python src/retrieve.py --model_type simclr --weights resnet50-1x.pth \
+python src/retrieve.py --model_type simclr \
     --query_dir data/competition/test/query \
     --gallery_dir data/competition/test/gallery
+```
+
+```bash
+python src/retrieve.py --model_type simclr \
+    --query_dir data/intel_dataset/test/query \
+    --gallery_dir data/intel_dataset/test/gallery \
+    --top_k 3 \
+    --custom_dataset
 ```
 
 #### 2. FaceNet Pretrained
@@ -163,16 +172,16 @@ python src/retrieve.py --model_type supcon-tuned \
 #### 1. Fine-tune SimCLR with SupCon on Competition Data
 
 ```bash
-python src/fine_tune.py --model simclr --pretrained resnet50-1x.pth \
-    --train_dir data/train --epochs 50 --batch_size 32 \
+python src/fine_tune.py --model simclr \
+    --train_dir data/train --epochs 50 --batch_size 128 \
     --save_dir checkpoints/supcon_experiment
 ```
 
 #### 2. Fine-tune on Intel Image Dataset
 
 ```bash
-python src/fine_tune.py --model simclr --pretrained resnet50-1x.pth \
-    --train_dir data/intel_dataset/train --epochs 100 --batch_size 32 \
+python src/fine_tune.py --model simclr \
+    --train_dir data/intel_dataset/train --epochs 100 --batch_size 128 \
     --save_dir checkpoints/supcon_experiment_intel_data
 ```
 
