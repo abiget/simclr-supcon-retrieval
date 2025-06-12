@@ -11,3 +11,6 @@ test.zip
 train.zip
 data/
 test_notebook.ipynb
+data.zip
+dataset_statistics.pth
+resnet50-1x.pth
