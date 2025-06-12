@@ -46,6 +46,7 @@ This project explores different approaches to image retrieval, comparing the eff
 - tqdm==4.67.1
 - wandb==0.19.11
 
+
 ## Model Architecture
 
 We experimented with two different approaches, each with distinct advantages for different types of data:
@@ -105,19 +106,23 @@ Note: The performance differences can be attributed to two key factors:
 
 #### Intel Image Dataset Retrieval Results
 
-![Intel Dataset Retrieval Results](results/similar_images_query_in_gallery_intel_dataset1.png)
+![Intel Dataset Retrieval Results](/results/similar_images_query_in_gallery_intel_dataset1.png)
 
 #### Competition Dataset Retrieval Results
 
-![Competition Data Retrieval Results](results/similar_images_query_in_gallery_competition_data.png)
+![Competition Data Retrieval Results](/results/similar_images_query_in_gallery_competition_data.png)
 
 #### Embedding Space Visualizations
 
 The t-SNE visualizations below demonstrate the embedding space organization. The Intel Image dataset results show clear clustering after fine-tuning with sufficient data, validating our approach despite the challenges with the competition dataset.
 
+<!-- ##### FaceNet Embeddings on Competition Data
+
+![t-SNE Visualization of FaceNet Embeddings](/results/t-SNE_Visualization_-_FaceNet_Embeddings.png) -->
+
 ##### ResNet-50 fine tuned with supcon Embeddings on Intel Dataset (100 epochs)
 
-![t-SNE Visualization of Intel Dataset](results/t-SNE_Visualization_Intel_Image_Dataset_Embeddings.png)
+![t-SNE Visualization of Intel Dataset](/results/t-SNE_Visualization_Intel_Image_Dataset_Embeddings.png)
 
 ## Usage
 
