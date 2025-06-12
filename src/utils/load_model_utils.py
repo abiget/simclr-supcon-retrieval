@@ -2,7 +2,7 @@ from full_model import SupConModel
 
 def load_model(model_path, backbone_only=False, device='cpu', model_type='facenet'):
 
-    if model_type == 'simclr-tuned':
+    if model_type == 'supcon-tuned':
         model = SupConModel.load_fine_tuned_model(
             model_path=model_path, 
             device=device
