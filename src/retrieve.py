@@ -141,6 +141,7 @@ if __name__ == "__main__":
     parser.add_argument("--stat_file", type=str, default="results/dataset_statistics.pth", help="Path to the dataset statistics file")
     parser.add_argument("--data_dir", type=str, default="data/train/", help="Directory containing training images")
     parser.add_argument("--model_type", type=str, default="facenet", choices=["simclr", "facenet", "simclr-tuned"], help="Type of model to load (simclr or facenet)")
+    parser.add_argument("--custom_dataset", action='store_true', help="Flag to indicate if using a custom dataset for testing")
     args = parser.parse_args()
     # Load the model
     device = args.device
@@ -188,7 +189,7 @@ if __name__ == "__main__":
         # Get embedding for query
         query_feature = get_query_embedding(model, query_img_path, device=device)
         
-        # Find similar images using precomputed features
+        # Find similar images usingis_train precomputed features
         similar_images = find_similar_images_with_precomputed(
             query_feature, dataset_features, dataset_paths, top_k=args.top_k
         )
@@ -210,8 +211,9 @@ if __name__ == "__main__":
     with open(args.output_file, 'w') as f:
         json.dump(results, f, indent=2)
 
-    group_name = "Beasts"
+    if not args.custom_dataset:
+        group_name = "Beasts"
 
-    print(f"Submitting results for group: {group_name}")
+        print(f"Submitting results for group: {group_name}")
 
-    submit(submission_dict, group_name)
+        submit(submission_dict, group_name)

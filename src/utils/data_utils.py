@@ -31,7 +31,7 @@ class ImageDataset(Dataset):
                     if fname.lower().endswith(('.png', '.jpg', '.jpeg')):
                         self.samples.append((os.path.join(cls_path, fname), self.class_to_idx[class_name]))
         else:
-            # No folders: just load images with label = None
+            # No fis_trainolders: just load images with label = None
             self.use_folders = False
             self.samples = [
                 (os.path.join(root, fname), None)
@@ -60,6 +60,19 @@ class TwoCropTransform:
         return [self.base_transform(x), self.base_transform(x)]
 
 def get_data_loader(data_dir, batch_size=64, num_workers=4, is_train=True, image_size=32, mean=[0.5]*3, std=[0.5]*3):
+    """
+    Get a DataLoader for the dataset at data_dir.
+    Args:
+        data_dir (str): Directory containing the dataset.
+        batch_size (int): Batch size for the DataLoader.
+        num_workers (int): Number of workers for DataLoader.
+        is_train (bool): Whether to apply training transformations or validation (In case).
+        image_size (int): Size to which images will be resized.
+        mean (list): Mean values for normalization.
+        std (list): Standard deviation values for normalization.
+    Returns:
+        DataLoader: A DataLoader for the dataset.
+    """
 
     if is_train:
         base_transform = transforms.Compose([
@@ -110,12 +123,16 @@ def compute_dataset_statistics(data_dir, image_size=32):
     return mean, std
 
 def load_data_statistics(stat_file, data_dir=None, image_size=32):
-    if os.path.exists(stat_file):
+    if osp.exists(stat_file):
         stat = torch.load(stat_file)
         mean, std = stat['mean'], stat['std']
-    else:
-        # If statistics file does not exist, compute them
+    elif data_dir is not None and os.listdir(data_dir):
+        # if there is a train dataset, compute statistics
         mean, std = compute_dataset_statistics(data_dir, image_size=image_size)
+    else:
+        # use imageNet defaults
+        mean = torch.tensor([0.485, 0.456, 0.406])
+        std = torch.tensor([0.229, 0.224, 0.225])
     return mean, std
 
 
