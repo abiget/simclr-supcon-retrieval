@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader, Dataset
 from utils.data_utils import load_data_statistics
 from submit import submit
 from fine_tune import download_simclr_checkpoint
+from evaluate import calculate_top_k_accuracy
 
 def extract_backbone_features(model, images, device='cpu'):
     """
@@ -225,3 +226,6 @@ if __name__ == "__main__":
 
         submit(submission_dict, group_name)
     else:
+        top_accuracy = calculate_top_k_accuracy(args.output_file, top_k=args.top_k)
+        print(f"Top-{args.top_k} accuracy for custom dataset: {top_accuracy}%")
+
