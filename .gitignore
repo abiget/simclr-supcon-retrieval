@@ -18,3 +18,24 @@ test_notebook.ipynb
 data.zip
 dataset_statistics.pth
 resnet50-1x.pth
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Python junk
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+
+# Editor junk
+.vscode/
+*.pylance
+*.log
+
+# Environment/config
+.env
+*.env
+.cache/
