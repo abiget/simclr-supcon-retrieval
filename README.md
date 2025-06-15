@@ -91,7 +91,7 @@ Our experimental workflow consisted of three main phases:
        - Extreme class imbalance (some classes having only 1 example)
        - Insufficient positive pairs for contrastive learning
        - Domain mismatch between SimCLR's natural image pretraining and face recognition task
-   - Results suggested this approach was unsuitable for such a small, imbalanced face dataset
+   - Results suggested this approach was unsuiPr 2table for such a small, imbalanced face dataset
 
 3. **Intel Image Dataset Validation**:
    - To verify our approach wasn't fundamentally flawed, we switched to the larger Intel Image Classification dataset
