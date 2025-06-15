@@ -75,21 +75,21 @@ This architecture comparison revealed how model performance is heavily influence
 Our experimental workflow consisted of three main phases:
 
 1. **Initial Evaluation on Competition Data**:
-   - Evaluated pretrained SimCLR (ResNet-50 backbone) - achieved 9.55% accuracy
-   - Evaluated pretrained FaceNet model - achieved 781 accuracy
+   - Evaluated pretrained SimCLR (ResNet-50 backbone) - achieved 9.55 score
+   - Evaluated pretrained FaceNet model - achieved 781 score
    - FaceNet showed significantly better performance without any fine-tuning
 
 2. **Competition Data Fine-tuning Attempt**:
    - Fine-tuned SimCLR model using SupCon loss on competition data
-   - After 50 epochs, achieved 18.42% accuracy
+   - After 50 epochs, achieved 18.42 score
    - Limited improvement suggested issues with the small training dataset
 
 3. **Intel Image Dataset Validation**:
    - To verify our approach, we switched to the larger Intel Image Classification dataset
-   - Initial evaluation with pretrained SimCLR showed strong 68.8% accuracy, likely due to:
+   - Initial evaluation with pretrained SimCLR showed strong 68.8% top-3 accuracy, likely due to:
      - Intel dataset's similarity to ImageNet's general-purpose nature
      - Better alignment with SimCLR's pretraining on natural images
-   - After fine-tuning with SupCon loss, achieved excellent 97.77% accuracy
+   - After fine-tuning with SupCon loss, achieved excellent 97.77% top-3 accuracy
    - This dramatic improvement validated our approach, confirming that performance was primarily limited by data availability in the competition dataset
 
 ### Model Performance Comparison
@@ -97,9 +97,9 @@ The first three results on the competition data is based on the evaluation metri
 
 | Model Configuration | Dataset | Accuracy (%) | Notes |
 |-------------------|----------|-------------|--------|
-| FaceNet (pretrained, no fine-tuning) | Competition Data | 781 | Best performance on competition data |
-| ResNet-50 (SimCLR pretrained) | Competition Data | 9.55 | Initial baseline, domain mismatch |
-| ResNet-50 (SimCLR + 50 epochs SupCon) | Competition Data | 18.42 | Limited by extremely scarce data (1 image/class) |
+| FaceNet (pretrained, no fine-tuning) | Competition Data | 781 (score) | Best performance on competition data |
+| ResNet-50 (SimCLR pretrained) | Competition Data | 9.55 (score) | Initial baseline, domain mismatch |
+| ResNet-50 (SimCLR + 50 epochs SupCon) | Competition Data | 18.42 (score) | Limited by extremely scarce data (1 image/class) |
 | ResNet-50 (SimCLR pretrained) | Intel Image | Top-3: 68.8 | Strong baseline due to dataset similarity with ImageNet |
 | ResNet-50 (SimCLR + SupCon fine-tuned) | Intel Image | Top-3: 97.77 | Excellent performance with sufficient data |
 
