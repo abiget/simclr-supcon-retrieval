@@ -32,7 +32,7 @@ This project explores different approaches to image retrieval, comparing the eff
    - Evaluate retrieval accuracy using class labels
 
 3. **Performance Analysis**:
-   - Measure top-k retrieval accuracy (9.55% to 78.10% on competition data)
+   - Measure top-k retrieval score (9.55 to 781 on competition data)
    - Demonstrate dramatic improvement with sufficient data (63% to 98.78% on Intel dataset)
    - Visualize embedding space organization using t-SNE
    - Analyze per-class performance and retrieval examples
@@ -45,7 +45,6 @@ This project explores different approaches to image retrieval, comparing the eff
 - torchvision==0.22.0+cu128
 - tqdm==4.67.1
 - wandb==0.19.11
-
 
 ## Model Architecture
 
@@ -79,34 +78,62 @@ Our experimental workflow consisted of three main phases:
    - Evaluated pretrained FaceNet model - achieved 781 score
    - FaceNet showed significantly better performance without any fine-tuning
 
-2. **Competition Data Fine-tuning Attempt**:
+2. **Competition Data Fine-tuning Analysis**:
    - Fine-tuned SimCLR model using SupCon loss on competition data
-   - After 50 epochs, achieved 18.42 score
-   - Limited improvement suggested issues with the small training dataset
+   - After 100 epochs, achieved 18 score
+   - Training dynamics analysis revealed instability:
+     - Initial phase: Loss decreased from around 3.7 to ~2.45 by epoch 20
+     - Significant instability around epochs 21-27:
+       - Sharp spike starting at epoch 21 (about 3.86)
+       - Peaked at epoch 22 (4.59)
+       - Gradual recovery to ~3.7 by epoch 26
+     - This unstable behavior suggests fundamental issues:
+       - Extreme class imbalance (some classes having only 1 example)
+       - Insufficient positive pairs for contrastive learning
+       - Domain mismatch between SimCLR's natural image pretraining and face recognition task
+   - Results suggested this approach was unsuiPr 2table for such a small, imbalanced face dataset
 
 3. **Intel Image Dataset Validation**:
-   - To verify our approach, we switched to the larger Intel Image Classification dataset
-   - Initial evaluation with pretrained SimCLR showed strong 68.8% top-3 accuracy, likely due to:
+   - To verify our approach wasn't fundamentally flawed, we switched to the larger Intel Image Classification dataset
+   - Initial evaluation with pretrained SimCLR showed strong 68.8% accuracy, likely due to:
      - Intel dataset's similarity to ImageNet's general-purpose nature
      - Better alignment with SimCLR's pretraining on natural images
-   - After fine-tuning with SupCon loss, achieved excellent 97.77% top-3 accuracy
-   - This dramatic improvement validated our approach, confirming that performance was primarily limited by data availability in the competition dataset
+     - Sufficient examples per class for effective contrastive learning
+   - After fine-tuning with SupCon loss, achieved excellent 97.77% accuracy
+   - This dramatic improvement confirmed our hypothesis that the poor performance on the competition dataset was due to:
+     - Extreme data scarcity
+     - Domain mismatch (faces vs natural images)
+     - Insufficient positive pairs for contrastive learning
+
+### Key Findings
+
+1. **Model-Data Compatibility**: 
+   - FaceNet's superior performance (781 vs SimCLR's 9.55) demonstrates the importance of using domain-specific pretrained models for limited face data
+   - SimCLR+SupCon performs exceptionally well (97.77%) when domain and data requirements are met
+
+2. **Data Requirements for SupCon**: Training dynamics revealed that Supervised Contrastive Learning requires:
+   - Multiple examples per class to create positive pairs
+   - Reasonably balanced class distribution
+   - Domain alignment with the pretraining dataset
+
+3. **Solution Validation**: While the approach struggled with the face dataset, its success on the Intel dataset (97.77%) validates that SimCLR+SupCon is highly effective when these requirements are met
 
 ### Model Performance Comparison
-The first three results on the competition data is based on the evaluation metrics given on the comptition(the evaluation server results).
+
+The first three results on the competition data is based on the evaluation metrics given on the competition (the evaluation server results).
 
 | Model Configuration | Dataset | Accuracy (%) | Notes |
 |-------------------|----------|-------------|--------|
-| FaceNet (pretrained, no fine-tuning) | Competition Data | 781 (score) | Best performance on competition data |
-| ResNet-50 (SimCLR pretrained) | Competition Data | 9.55 (score) | Initial baseline, domain mismatch |
-| ResNet-50 (SimCLR + 50 epochs SupCon) | Competition Data | 18.42 (score) | Limited by extremely scarce data (1 image/class) |
+| FaceNet (pretrained, no fine-tuning) | Competition Data | 781 | Best performance on competition data |
+| ResNet-50 (SimCLR pretrained) | Competition Data | 9.55 | Initial baseline, domain mismatch |
+| ResNet-50 (SimCLR + 50 epochs SupCon) | Competition Data | 18 | Limited by extremely scarce data (1 image/class) |
 | ResNet-50 (SimCLR pretrained) | Intel Image | Top-3: 68.8 | Strong baseline due to dataset similarity with ImageNet |
 | ResNet-50 (SimCLR + SupCon fine-tuned) | Intel Image | Top-3: 97.77 | Excellent performance with sufficient data |
 
 Note: The performance differences can be attributed to two key factors:
 
-1. Dataset Domain: SimCLR's pretrained weights performed better on Intel dataset (68.8%) versus competition data (9.55%) due to its similarity with ImageNet-style natural images
-2. Training Data Availability: The competition dataset's extreme scarcity (1 image per class) severely limited fine-tuning potential, while the Intel dataset provided sufficient examples for effective learning
+1. Dataset Domain: SimCLR's pretrained weights performed better on Intel dataset (68.8%) versus competition data (9.55 (though its score)) due to its similarity with ImageNet-style natural images
+2. Training Data Availability: The competition dataset's extreme scarcity (some example contain 1 image per class) severely limited fine-tuning potential, while the Intel dataset provided sufficient examples for effective learning
 
 ### Visualization Results
 
@@ -162,7 +189,7 @@ python src/retrieve.py --model_type facenet \
 
 ```bash
 python src/retrieve.py --model_type supcon-tuned \
-    --weights checkpoints/supcon_experiment/supcon_model_final.pth \
+    --model_path checkpoints/supcon_experiment_final/supcon_model_final.pth \
     --query_dir data/competition/test/query \
     --gallery_dir data/competition/test/gallery
 ```

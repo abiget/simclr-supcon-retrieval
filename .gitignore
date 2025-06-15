@@ -5,6 +5,9 @@ __pycache__/
 .vscode/
 .venv/
 checkpoints/
+
+# all in checkpoints/supcon_experiment_final except one file
+
 wandb/
 resnet50-1x.pth
 test.zip
@@ -78,3 +81,4 @@ pip-log.txt
 
 # Package manager
 *.lock
+results/submission_50.json
