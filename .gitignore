@@ -21,4 +21,64 @@ test_notebook.ipynb
 data.zip
 dataset_statistics.pth
 resnet50-1x.pth
+
+src/__pycache__/
+src/*.py[cod]
+src/.vscode/
+src/resnet50_CE_loss/data/train
+
+# ===== Extended ignore rules for general cleanup =====
+
+# OS system junk
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+.Spotlight-V100
+.Trashes
+
+# Virtual environments
+env/
+ENV/
+*.env
+.venv/
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+*.egg
+*.egg-info/
+*.pdb
+
+# Logs and temporary files
+*.log
+*.out
+*.tmp
+.cache/
+pip-log.txt
+
+# IDE and editor files
+
+# VS Code
+.vscode/
+*.code-workspace
+*.pylance
+
+# PyCharm
+.idea/
+*.iml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Pytest and testing
+.pytest_cache/
+.tox/
+
+# Package manager
+*.lock
 results/submission_50.json
