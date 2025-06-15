@@ -185,28 +185,10 @@ python src/fine_tune.py --model simclr \
     --save_dir checkpoints/supcon_experiment_intel_data
 ```
 
-## Credits
-
-This implementation builds upon the following excellent repositories:
-
-1. [SupContrast](https://github.com/HobbitLong/SupContrast) - Implementation of Supervised Contrastive Learning
-2. [facenet-pytorch](https://github.com/timesler/facenet-pytorch) - PyTorch implementation of FaceNet used for baseline comparison
-3. [lightly-ai/simclr](https://huggingface.co/lightly-ai/simclrv1-imagenet1k-resnet50-1x) - Pretrained SimCLR ResNet-50 weights for feature extraction
-
-## References
-
-1. [Supervised Contrastive Learning](https://arxiv.org/abs/2004.11362)
-2. [A Simple Framework for Contrastive Learning of Visual Representations (SimCLR)](https://arxiv.org/abs/2002.05709)
-3. [FaceNet: A Unified Embedding for Face Recognition and Clustering](https://arxiv.org/abs/1503.03832)
-
-## License
-
-[MIT License](LICENSE)
-
 
 # resnet50_CE_loss
 
-This is a Python project that runs the ResNet50 model for image feature extraction.
+This section of the project runs the ResNet50 model for image feature extraction.
 
 ## Contents
 
@@ -225,3 +207,21 @@ This is a Python project that runs the ResNet50 model for image feature extracti
 3. Then run the **fine-tuned model**: python model_fine_tuned.py
 
 4. **Important**: Before running any script, make sure to **update the image folder paths** at the beginning of each file so they correctly point to your local training and testing directories.
+
+## Credits
+
+This implementation builds upon the following excellent repositories:
+
+1. [SupContrast](https://github.com/HobbitLong/SupContrast) - Implementation of Supervised Contrastive Learning
+2. [facenet-pytorch](https://github.com/timesler/facenet-pytorch) - PyTorch implementation of FaceNet used for baseline comparison
+3. [lightly-ai/simclr](https://huggingface.co/lightly-ai/simclrv1-imagenet1k-resnet50-1x) - Pretrained SimCLR ResNet-50 weights for feature extraction
+
+## References
+
+1. [Supervised Contrastive Learning](https://arxiv.org/abs/2004.11362)
+2. [A Simple Framework for Contrastive Learning of Visual Representations (SimCLR)](https://arxiv.org/abs/2002.05709)
+3. [FaceNet: A Unified Embedding for Face Recognition and Clustering](https://arxiv.org/abs/1503.03832)
+
+## License
+
+[MIT License](LICENSE)

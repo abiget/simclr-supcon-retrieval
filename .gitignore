@@ -19,6 +19,11 @@ data.zip
 dataset_statistics.pth
 resnet50-1x.pth
 
+src/__pycache__/
+src/*.py[cod]
+src/.vscode/
+src/resnet50_CE_loss/data/train
+
 # ===== Extended ignore rules for general cleanup =====
 
 # OS system junk
