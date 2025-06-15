@@ -4,7 +4,13 @@ __pycache__/
 *.py[cod]
 .vscode/
 .venv/
-checkpoints/
+# checkpoints/
+
+# all in checkpoints/supcon_experiment_final except one file
+checkpoints/supcon_experiment/
+checkpoints/supcon_experiment1/
+checkpoints/supcon_experimentx/
+
 wandb/
 resnet50-1x.pth
 test.zip
@@ -18,3 +24,4 @@ test_notebook.ipynb
 data.zip
 dataset_statistics.pth
 resnet50-1x.pth
+results/submission_50.json
