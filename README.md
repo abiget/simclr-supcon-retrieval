@@ -9,6 +9,7 @@ This project explores different approaches to image retrieval, comparing the eff
 - Comparative analysis of different image retrieval approaches:
   - ResNet-50 pretrained with SimCLR (with and without fine-tuning)
   - FaceNet pretrained model evaluation
+  - EfficientNet
   - Performance comparison on both limited and large-scale datasets
 - Implementation of Supervised Contrastive Learning for fine-tuning
 - Comprehensive evaluation framework:
@@ -67,6 +68,13 @@ We experimented with three different approaches:
    - Projection Head: MLP with structure [2048 → 512 → 128]
    - Optimized for: Better feature learning on target dataset
 
+3. **EfficientNet Fine-Tuned**:
+
+   - EfficientNet-B0 backbone pretrained on ImageNet
+   - Fine-tuned on competition dataset with cross-entropy loss and label smoothing
+   - Classification head replaced with a linear layer matching number of classes
+   - Optimized for: Compact yet accurate visual feature extraction with fast inference
+
 This architecture comparison revealed how model performance is heavily influenced by the alignment between pretraining domain and target dataset characteristics.
 
 ## Results and Performance
@@ -110,7 +118,7 @@ Our experimental workflow consisted of three main phases:
 1. **Model-Data Compatibility**: 
    - FaceNet's superior performance (781 vs SimCLR's 9.55) demonstrates the importance of using domain-specific pretrained models for limited face data
    - SimCLR+SupCon performs exceptionally well (97.77%) when domain and data requirements are met
-
+   - EfficientNet Fine-Tuned achieves strong performance (85.01%) by combining architectural efficiency with domain-specific fine-tuning, making it ideal when both accuracy and computational cost matter.
 2. **Data Requirements for SupCon**: Training dynamics revealed that Supervised Contrastive Learning requires:
    - Multiple examples per class to create positive pairs
    - Reasonably balanced class distribution
@@ -124,6 +132,7 @@ The first three results on the competition data is based on the evaluation metri
 
 | Model Configuration | Dataset | Accuracy (%) | Notes |
 |-------------------|----------|-------------|--------|
+| EfficientNet (Fine-Tuned) | Competition Data | 85.01 | High accuracy with minimal parameters; benefits from domain-specific fine-tuning |
 | FaceNet (pretrained, no fine-tuning) | Competition Data | 781 | Best performance on competition data |
 | ResNet-50 (SimCLR pretrained) | Competition Data | 9.55 | Initial baseline, domain mismatch |
 | ResNet-50 (SimCLR + 50 epochs SupCon) | Competition Data | 18 | Limited by extremely scarce data (1 image/class) |
